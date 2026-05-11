@@ -237,7 +237,7 @@ async function startCamera(){
   try{
     if(state.stream) state.stream.getTracks().forEach(t=>t.stop());
     state.stream = await navigator.mediaDevices.getUserMedia({
-      video:{ facingMode: state.facing }, audio:false
+      video:{ facingMode: state.facing, width:{ ideal:1920 }, height:{ ideal:1080 } }, audio:false
     });
     $('video').srcObject = state.stream;
     return true;
@@ -276,12 +276,17 @@ function loadImg(src){
 }
 async function composeToCanvas(canvas, sourceImg, frameSrc){
   const ctx=canvas.getContext('2d');
-  const w=sourceImg.naturalWidth||sourceImg.videoWidth||sourceImg.width;
-  const h=sourceImg.naturalHeight||sourceImg.videoHeight||sourceImg.height;
-  canvas.width=w; canvas.height=h;
-  ctx.drawImage(sourceImg,0,0,w,h);
+  const sw=sourceImg.naturalWidth||sourceImg.videoWidth||sourceImg.width;
+  const sh=sourceImg.naturalHeight||sourceImg.videoHeight||sourceImg.height;
   const frame=await loadImg(frameSrc);
-  // contain 模式铺在照片上（保持相框比例不变形）
+  // 画布尺寸取 source 与 frame 的较大值（按 source 比例放大），避免相框被降采样
+  const sr=sw/sh;
+  const scale=Math.max(1, frame.naturalWidth/sw, frame.naturalHeight/sh);
+  const w=Math.round(sw*scale), h=Math.round(sh*scale);
+  canvas.width=w; canvas.height=h;
+  ctx.imageSmoothingEnabled=true;
+  ctx.imageSmoothingQuality='high';
+  ctx.drawImage(sourceImg,0,0,w,h);
   const fr=frame.naturalWidth/frame.naturalHeight;
   const cr=w/h;
   let dw,dh,dx,dy;
