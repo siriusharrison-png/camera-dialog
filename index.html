@@ -41,8 +41,8 @@
   .status-dot.err{background:var(--err);box-shadow:0 0 0 4px rgba(248,113,113,.15)}
   .status-detail{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.5}
   .reauth-btn{margin-top:14px;padding:11px 16px;background:var(--surface-2);border-radius:12px;font-size:14px;width:100%;font-weight:500}
-  .actions{display:flex;flex-direction:column;gap:12px;margin-bottom:8px}
-  .big-btn{padding:18px;font-size:17px;font-weight:600;border-radius:18px;display:flex;align-items:center;justify-content:center;gap:10px;transition:transform .15s}
+  .actions{display:flex;flex-direction:row;gap:12px;margin-bottom:8px}
+  .big-btn{flex:1;padding:18px;font-size:17px;font-weight:600;border-radius:18px;display:flex;align-items:center;justify-content:center;gap:10px;transition:transform .15s}
   .big-btn:active{transform:scale(.98)}
   .btn-camera{background:var(--brand);color:#062b35;box-shadow:0 8px 24px -8px rgba(63,182,214,.5)}
   .btn-upload{background:var(--surface);color:var(--text);border:1px solid var(--line)}
@@ -56,11 +56,15 @@
   .icon-btn{width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.12);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;font-size:18px;transition:transform .15s}
   .icon-btn:active{transform:scale(.92)}
   .cam-bottom{position:absolute;bottom:0;left:0;right:0;z-index:3;background:linear-gradient(to top,rgba(0,0,0,.78),transparent);padding:18px 0 34px}
+  /* 通用 picker:横向（editor 内用） */
   .frame-picker{display:flex;gap:10px;overflow-x:auto;padding:0 20px 18px;-webkit-overflow-scrolling:touch}
   .frame-picker::-webkit-scrollbar{display:none}
   .frame-thumb{flex-shrink:0;width:56px;height:56px;border-radius:14px;background:rgba(255,255,255,.08);padding:4px;border:2px solid transparent;transition:border-color .2s,transform .15s}
   .frame-thumb.active{border-color:var(--brand);transform:scale(1.05)}
   .frame-thumb img{width:100%;height:100%;object-fit:contain}
+  /* 相机:左侧竖排 picker */
+  #camPicker{position:absolute;left:14px;top:50%;transform:translateY(-50%);z-index:3;flex-direction:column;gap:10px;padding:10px 6px;max-height:60vh;overflow-y:auto;overflow-x:hidden;background:rgba(0,0,0,.32);border-radius:18px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  #camPicker .frame-thumb{width:48px;height:48px;background:rgba(255,255,255,.1)}
   .shutter-row{display:flex;align-items:center;justify-content:center}
   .shutter{width:74px;height:74px;border-radius:50%;background:#fff;border:5px solid rgba(255,255,255,.28);background-clip:padding-box;transition:transform .15s}
   .shutter:active{transform:scale(.92)}
@@ -97,8 +101,7 @@
 <!-- View 1: Entry -->
 <div id="entry" class="view active">
   <div>
-    <div class="brand"><span class="brand-dot"></span>Check·In</div>
-    <div class="title">现场打卡</div>
+    <div class="title">舞舞舞</div>
     <div class="subtitle">定位识别 · 一键拍照留念</div>
     <div class="status-card">
       <div class="status-line">
@@ -110,8 +113,8 @@
     </div>
   </div>
   <div class="actions">
-    <button class="big-btn btn-camera" id="openCamera">📷 拍照打卡</button>
-    <button class="big-btn btn-upload" id="openUpload">🖼️ 上传图片</button>
+    <button class="big-btn btn-camera" id="openCamera">拍照打卡</button>
+    <button class="big-btn btn-upload" id="openUpload">上传图片</button>
     <input type="file" id="uploadInput" accept="image/*" style="display:none">
     <input type="file" id="fallbackInput" accept="image/*" capture="environment" style="display:none">
   </div>
@@ -122,13 +125,13 @@
   <div class="cam-stage">
     <video id="video" autoplay playsinline muted></video>
     <img class="frame-overlay" id="camFrame" alt="">
+    <div class="frame-picker" id="camPicker"></div>
   </div>
   <div class="cam-top">
     <button class="icon-btn" id="camBack">✕</button>
     <button class="icon-btn" id="camSwitch">⇄</button>
   </div>
   <div class="cam-bottom">
-    <div class="frame-picker" id="camPicker"></div>
     <div class="shutter-row">
       <button class="shutter" id="shutter"></button>
     </div>
