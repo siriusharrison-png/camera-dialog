@@ -337,8 +337,8 @@ $('shutter').onclick=async()=>{
   const c=document.createElement('canvas');
   c.width=video.videoWidth; c.height=video.videoHeight;
   c.getContext('2d').drawImage(video,0,0);
-  const dataUrl=c.toDataURL('image/jpeg',0.92);
-  state.sourceImage=await loadImg(dataUrl);
+  // 直接用 canvas 作为源,跳过 JPEG 编解码,保持无损
+  state.sourceImage=c;
   stopCamera();
   enterEditor();
 };
