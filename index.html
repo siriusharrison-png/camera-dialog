@@ -6,71 +6,90 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>现场打卡</title>
 <style>
+  :root{
+    --bg:#0b0e12;
+    --surface:#151a21;
+    --surface-2:#1d242d;
+    --line:rgba(255,255,255,.06);
+    --text:#fff;
+    --muted:rgba(255,255,255,.55);
+    --brand:#3FB6D6;
+    --brand-2:#67D4E8;
+    --brand-soft:rgba(63,182,214,.16);
+    --ok:#4ade80;
+    --warn:#fbbf24;
+    --err:#f87171;
+  }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-  html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",Arial,sans-serif;background:#111;color:#fff;overflow:hidden}
+  html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--text);overflow:hidden}
   body{display:flex;flex-direction:column;height:100vh;height:100dvh}
   .view{display:none;flex:1;flex-direction:column;min-height:0}
   .view.active{display:flex}
   button{border:none;background:none;color:inherit;font:inherit;cursor:pointer}
 
   /* ---------- Entry ---------- */
-  #entry{padding:40px 24px;justify-content:space-between;background:linear-gradient(160deg,#1a1a2e,#16213e)}
-  .title{font-size:28px;font-weight:700;margin-top:40px}
-  .subtitle{font-size:14px;opacity:.7;margin-top:8px}
-  .status-card{background:rgba(255,255,255,.08);border-radius:16px;padding:20px;margin:24px 0;backdrop-filter:blur(10px)}
-  .status-line{display:flex;align-items:center;gap:10px;font-size:15px}
-  .status-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-  .status-dot.ok{background:#4ade80}
-  .status-dot.warn{background:#fbbf24}
-  .status-dot.err{background:#f87171}
-  .status-detail{font-size:13px;opacity:.7;margin-top:6px;line-height:1.5}
-  .reauth-btn{margin-top:12px;padding:10px 16px;background:rgba(255,255,255,.15);border-radius:10px;font-size:14px;width:100%}
-  .actions{display:flex;flex-direction:column;gap:14px;margin-bottom:20px}
-  .big-btn{padding:20px;font-size:18px;font-weight:600;border-radius:16px;display:flex;align-items:center;justify-content:center;gap:10px}
-  .btn-camera{background:linear-gradient(135deg,#667eea,#764ba2)}
-  .btn-upload{background:linear-gradient(135deg,#f093fb,#f5576c)}
+  #entry{padding:48px 24px 28px;justify-content:space-between;background:radial-gradient(120% 80% at 0% 0%,rgba(63,182,214,.18),transparent 60%),radial-gradient(120% 80% at 100% 100%,rgba(63,182,214,.08),transparent 60%),var(--bg)}
+  .brand{display:flex;align-items:center;gap:8px;font-family:"Cormorant Garamond","Times New Roman",serif;font-size:22px;letter-spacing:.5px;opacity:.9}
+  .brand-dot{width:6px;height:6px;border-radius:50%;background:var(--brand)}
+  .title{font-size:32px;font-weight:700;margin-top:36px;letter-spacing:-.5px}
+  .subtitle{font-size:14px;color:var(--muted);margin-top:8px}
+  .status-card{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:20px;margin:28px 0}
+  .status-line{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:500}
+  .status-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;box-shadow:0 0 0 4px rgba(255,255,255,.04)}
+  .status-dot.ok{background:var(--ok);box-shadow:0 0 0 4px rgba(74,222,128,.15)}
+  .status-dot.warn{background:var(--warn);box-shadow:0 0 0 4px rgba(251,191,36,.15)}
+  .status-dot.err{background:var(--err);box-shadow:0 0 0 4px rgba(248,113,113,.15)}
+  .status-detail{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.5}
+  .reauth-btn{margin-top:14px;padding:11px 16px;background:var(--surface-2);border-radius:12px;font-size:14px;width:100%;font-weight:500}
+  .actions{display:flex;flex-direction:column;gap:12px;margin-bottom:8px}
+  .big-btn{padding:18px;font-size:17px;font-weight:600;border-radius:18px;display:flex;align-items:center;justify-content:center;gap:10px;transition:transform .15s}
+  .big-btn:active{transform:scale(.98)}
+  .btn-camera{background:var(--brand);color:#062b35;box-shadow:0 8px 24px -8px rgba(63,182,214,.5)}
+  .btn-upload{background:var(--surface);color:var(--text);border:1px solid var(--line)}
 
   /* ---------- Camera ---------- */
   #camera{background:#000;position:relative}
   .cam-stage{position:relative;flex:1;overflow:hidden;display:flex;align-items:center;justify-content:center}
   #video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
   .frame-overlay{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;z-index:2}
-  .cam-top{position:absolute;top:0;left:0;right:0;padding:16px;display:flex;justify-content:space-between;z-index:3;background:linear-gradient(to bottom,rgba(0,0,0,.5),transparent)}
-  .icon-btn{width:40px;height:40px;border-radius:50%;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font-size:18px}
-  .cam-bottom{position:absolute;bottom:0;left:0;right:0;z-index:3;background:linear-gradient(to top,rgba(0,0,0,.7),transparent);padding:20px 0 32px}
-  .frame-picker{display:flex;gap:10px;overflow-x:auto;padding:0 20px 16px;-webkit-overflow-scrolling:touch}
+  .cam-top{position:absolute;top:0;left:0;right:0;padding:18px;display:flex;justify-content:space-between;z-index:3;background:linear-gradient(to bottom,rgba(0,0,0,.55),transparent)}
+  .icon-btn{width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.12);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;font-size:18px;transition:transform .15s}
+  .icon-btn:active{transform:scale(.92)}
+  .cam-bottom{position:absolute;bottom:0;left:0;right:0;z-index:3;background:linear-gradient(to top,rgba(0,0,0,.78),transparent);padding:18px 0 34px}
+  .frame-picker{display:flex;gap:10px;overflow-x:auto;padding:0 20px 18px;-webkit-overflow-scrolling:touch}
   .frame-picker::-webkit-scrollbar{display:none}
-  .frame-thumb{flex-shrink:0;width:56px;height:56px;border-radius:10px;background:rgba(255,255,255,.1);padding:4px;border:2px solid transparent;transition:border-color .2s}
-  .frame-thumb.active{border-color:#fff}
+  .frame-thumb{flex-shrink:0;width:56px;height:56px;border-radius:14px;background:rgba(255,255,255,.08);padding:4px;border:2px solid transparent;transition:border-color .2s,transform .15s}
+  .frame-thumb.active{border-color:var(--brand);transform:scale(1.05)}
   .frame-thumb img{width:100%;height:100%;object-fit:contain}
   .shutter-row{display:flex;align-items:center;justify-content:center}
-  .shutter{width:72px;height:72px;border-radius:50%;background:#fff;border:5px solid rgba(255,255,255,.3);background-clip:padding-box}
+  .shutter{width:74px;height:74px;border-radius:50%;background:#fff;border:5px solid rgba(255,255,255,.28);background-clip:padding-box;transition:transform .15s}
   .shutter:active{transform:scale(.92)}
 
   /* ---------- Editor ---------- */
-  #editor{background:#0a0a0a}
-  .ed-top{padding:14px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.08)}
+  #editor{background:var(--bg)}
+  .ed-top{padding:14px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}
   .ed-title{font-size:16px;font-weight:600}
-  .ed-stage{flex:1;display:flex;align-items:center;justify-content:center;padding:16px;min-height:0}
-  #previewCanvas{max-width:100%;max-height:100%;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,.5)}
-  .ed-bottom{padding:16px;background:#141414}
-  .ed-label{font-size:13px;opacity:.6;margin-bottom:10px}
-  .ed-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
-  .ed-actions.three{grid-template-columns:1fr 1fr 1fr}
-  .ed-btn{padding:14px 10px;border-radius:12px;font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px}
-  .ed-btn.primary{background:linear-gradient(135deg,#667eea,#764ba2)}
-  .ed-btn.ghost{background:rgba(255,255,255,.1)}
+  .ed-top .icon-btn{background:var(--surface)}
+  .ed-stage{flex:1;display:flex;align-items:center;justify-content:center;padding:18px;min-height:0}
+  #previewCanvas{max-width:100%;max-height:100%;border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+  .ed-bottom{padding:18px 16px 22px;background:var(--surface);border-top-left-radius:24px;border-top-right-radius:24px}
+  .ed-label{font-size:12px;color:var(--muted);margin-bottom:12px;letter-spacing:.5px;text-transform:uppercase}
+  .ed-actions{display:flex;justify-content:center;align-items:center;gap:22px;margin-top:18px}
+  .ed-fab{width:58px;height:58px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;transition:transform .15s}
+  .ed-fab:active{transform:scale(.92)}
+  .ed-fab.ghost{background:var(--surface-2);color:var(--text)}
+  .ed-fab.primary{width:68px;height:68px;background:var(--brand);color:#062b35;box-shadow:0 10px 30px -8px rgba(63,182,214,.55);font-size:24px}
 
   /* ---------- Toast ---------- */
-  .toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.85);padding:14px 20px;border-radius:10px;z-index:100;font-size:14px;max-width:80%;text-align:center;opacity:0;transition:opacity .3s;pointer-events:none}
+  .toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(10,14,18,.92);border:1px solid var(--line);padding:14px 20px;border-radius:14px;z-index:100;font-size:14px;max-width:80%;text-align:center;opacity:0;transition:opacity .3s;pointer-events:none;backdrop-filter:blur(12px)}
   .toast.show{opacity:1}
 
   /* ---------- Modal ---------- */
-  .modal{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:200;display:none;align-items:center;justify-content:center;flex-direction:column;padding:20px}
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:200;display:none;align-items:center;justify-content:center;flex-direction:column;padding:20px;backdrop-filter:blur(20px)}
   .modal.show{display:flex}
-  .modal img{max-width:100%;max-height:70vh;border-radius:8px}
-  .modal-tip{margin-top:20px;font-size:15px;text-align:center;padding:12px 20px;background:rgba(255,255,255,.1);border-radius:10px}
-  .modal-close{position:absolute;top:20px;right:20px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:20px}
+  .modal img{max-width:100%;max-height:70vh;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+  .modal-tip{margin-top:20px;font-size:14px;text-align:center;padding:12px 20px;background:var(--surface);border:1px solid var(--line);border-radius:12px;color:var(--muted)}
+  .modal-close{position:absolute;top:20px;right:20px;width:40px;height:40px;border-radius:50%;background:var(--surface);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:18px}
 </style>
 </head>
 <body>
@@ -78,8 +97,9 @@
 <!-- View 1: Entry -->
 <div id="entry" class="view active">
   <div>
+    <div class="brand"><span class="brand-dot"></span>Check·In</div>
     <div class="title">现场打卡</div>
-    <div class="subtitle">扫码拍照留念</div>
+    <div class="subtitle">定位识别 · 一键拍照留念</div>
     <div class="status-card">
       <div class="status-line">
         <span class="status-dot" id="statusDot"></span>
@@ -129,8 +149,8 @@
     <div class="ed-label">选择相框</div>
     <div class="frame-picker" id="edPicker"></div>
     <div class="ed-actions" id="edActions">
-      <button class="ed-btn ghost" id="edRetake">🔄 重新选择</button>
-      <button class="ed-btn primary" id="edSave">💾 保存图片</button>
+      <button class="ed-fab ghost" id="edRetake" title="重新选择">🔄</button>
+      <button class="ed-fab primary" id="edSave" title="保存图片">💾</button>
     </div>
   </div>
 </div>
