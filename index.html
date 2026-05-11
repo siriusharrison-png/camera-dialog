@@ -239,7 +239,14 @@ async function startCamera(){
     state.stream = await navigator.mediaDevices.getUserMedia({
       video:{ facingMode: state.facing, width:{ ideal:1920 }, height:{ ideal:1080 } }, audio:false
     });
-    $('video').srcObject = state.stream;
+    const video=$('video');
+    video.srcObject = state.stream;
+    // iOS/部分浏览器首屏 autoplay 不稳,显式等 metadata 就绪后 play
+    await new Promise(res=>{
+      if(video.readyState>=1) return res();
+      video.onloadedmetadata=()=>res();
+    });
+    try{ await video.play(); }catch(e){ console.warn('video.play failed', e); }
     return true;
   }catch(e){
     console.warn('getUserMedia failed', e);
