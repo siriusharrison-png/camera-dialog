@@ -170,7 +170,7 @@ const CONFIG = {
   location: { lat: 31.451889, lng: 121.124306 },
   radiusMeters: 500,
   frames: {
-    onsite:  ['frames/frame-1.png','frames/frame-2.png','frames/frame-3.png','frames/frame-4.png'],
+    onsite:  ['frames/frame-1.png','frames/frame-2.png','frames/frame-3.png','frames/frame-4.png','frames/frame-5.png','frames/frame-6.png','frames/frame-7.png'],
     offsite: ['frames/frame-off-1.png','frames/frame-off-2.png']
   }
 };
@@ -233,7 +233,7 @@ function updateStatusUI(msg){
     case 'pending':
       dot.className='status-dot warn'; txt.textContent='正在获取位置…'; detail.textContent=''; break;
     case 'onsite':
-      dot.className='status-dot ok'; txt.textContent='✅ 已在现场'; detail.textContent=`距活动点 ${Math.round(state.distance)}m · 可用 4 款相框`; break;
+      dot.className='status-dot ok'; txt.textContent='✅ 已在现场'; detail.textContent=`距活动点 ${Math.round(state.distance)}m · 可用 7 款相框`; break;
     case 'offsite':
       dot.className='status-dot warn'; txt.textContent='⚠️ 不在现场范围';
       detail.textContent=`距活动点 ${Math.round(state.distance)}m · 可用 2 款相框`;
