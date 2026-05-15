@@ -77,11 +77,11 @@
   #previewCanvas{max-width:100%;max-height:100%;border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
   .ed-bottom{padding:18px 16px 22px;background:var(--surface);border-top-left-radius:24px;border-top-right-radius:24px}
   .ed-label{font-size:12px;color:var(--muted);margin-bottom:12px;letter-spacing:.5px;text-transform:uppercase}
-  .ed-actions{display:flex;justify-content:center;align-items:center;gap:22px;margin-top:18px}
-  .ed-fab{width:58px;height:58px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;transition:transform .15s}
-  .ed-fab:active{transform:scale(.92)}
-  .ed-fab.ghost{background:var(--surface-2);color:var(--text)}
-  .ed-fab.primary{width:68px;height:68px;background:var(--brand);color:#062b35;box-shadow:0 10px 30px -8px rgba(63,182,214,.55);font-size:24px}
+  .ed-actions{display:flex;justify-content:center;align-items:center;gap:12px;margin-top:18px}
+  .ed-btn{flex:1;padding:16px 20px;border-radius:14px;font-size:16px;font-weight:600;transition:transform .15s}
+  .ed-btn:active{transform:scale(.98)}
+  .ed-btn.ghost{background:var(--surface-2);color:var(--text)}
+  .ed-btn.primary{background:var(--brand);color:#062b35;box-shadow:0 8px 24px -8px rgba(63,182,214,.5)}
 
   /* ---------- Toast ---------- */
   .toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(10,14,18,.92);border:1px solid var(--line);padding:14px 20px;border-radius:14px;z-index:100;font-size:14px;max-width:80%;text-align:center;opacity:0;transition:opacity .3s;pointer-events:none;backdrop-filter:blur(12px)}
@@ -150,8 +150,8 @@
     <div class="ed-label">选择相框</div>
     <div class="frame-picker" id="edPicker"></div>
     <div class="ed-actions" id="edActions">
-      <button class="ed-fab ghost" id="edRetake" title="重新选择">🔄</button>
-      <button class="ed-fab primary" id="edSave" title="保存图片">💾</button>
+      <button class="ed-btn ghost" id="edRetake">重新选择</button>
+      <button class="ed-btn primary" id="edSave">保存图片</button>
     </div>
   </div>
 </div>
@@ -169,10 +169,7 @@
 const CONFIG = {
   location: { lat: 31.451889, lng: 121.124306 },
   radiusMeters: 500,
-  frames: {
-    onsite:  ['frames/frame-1.png','frames/frame-2.png','frames/frame-3.png','frames/frame-4.png','frames/frame-5.png','frames/frame-6.png','frames/frame-7.png'],
-    offsite: ['frames/frame-off-1.png','frames/frame-off-2.png']
-  }
+  frames: ['frames/frame-1.png','frames/frame-2.png','frames/frame-3.png','frames/frame-4.png','frames/frame-5.png','frames/frame-6.png','frames/frame-7.png']
 };
 
 // ============ State ============
@@ -228,28 +225,36 @@ function setGeo(status, msg){
 }
 function updateStatusUI(msg){
   const dot=$('statusDot'), txt=$('statusText'), detail=$('statusDetail'), re=$('reauthBtn');
+  const camBtn=$('openCamera');
   re.style.display='none';
+  camBtn.disabled=false;
+  camBtn.style.opacity='1';
   switch(state.geoStatus){
     case 'pending':
-      dot.className='status-dot warn'; txt.textContent='正在获取位置…'; detail.textContent=''; break;
+      dot.className='status-dot warn'; txt.textContent='正在获取位置…'; detail.textContent='';
+      camBtn.disabled=true; camBtn.style.opacity='0.5'; break;
     case 'onsite':
-      dot.className='status-dot ok'; txt.textContent='✅ 已在现场'; detail.textContent=`距活动点 ${Math.round(state.distance)}m · 可用 7 款相框`; break;
+      dot.className='status-dot ok'; txt.textContent='✅ 已在现场';
+      detail.textContent=`距活动点 ${Math.round(state.distance)}m · 可拍照打卡`; break;
     case 'offsite':
       dot.className='status-dot warn'; txt.textContent='⚠️ 不在现场范围';
-      detail.textContent=`距活动点 ${Math.round(state.distance)}m · 可用 2 款相框`;
+      detail.textContent=`距活动点 ${Math.round(state.distance)}m · 仅支持上传图片`;
+      camBtn.disabled=true; camBtn.style.opacity='0.5';
       re.style.display='block'; re.textContent='重新定位'; break;
     case 'denied':
       dot.className='status-dot err'; txt.textContent='📍 未授权位置';
-      detail.textContent='仅可使用 2 款相框 · 授权后解锁全部';
+      detail.textContent='授权后可拍照打卡 · 当前仅支持上传';
+      camBtn.disabled=true; camBtn.style.opacity='0.5';
       re.style.display='block'; re.textContent='授权位置'; break;
     case 'error':
       dot.className='status-dot err'; txt.textContent='定位失败';
-      detail.textContent=(msg||'请检查网络或重试') + ' · 仅可使用 2 款相框';
+      detail.textContent=(msg||'请检查网络或重试') + ' · 仅支持上传图片';
+      camBtn.disabled=true; camBtn.style.opacity='0.5';
       re.style.display='block'; re.textContent='重新尝试'; break;
   }
 }
 function updateFrames(){
-  state.currentFrames = state.geoStatus==='onsite' ? CONFIG.frames.onsite : CONFIG.frames.offsite;
+  state.currentFrames = CONFIG.frames;
   state.selectedFrame = 0;
 }
 
@@ -327,6 +332,10 @@ async function composeToCanvas(canvas, sourceImg, frameSrc){
 $('reauthBtn').onclick=requestLocation;
 
 $('openCamera').onclick=async()=>{
+  if(state.geoStatus!=='onsite'){
+    toast('请先到达活动现场后再拍照');
+    return;
+  }
   switchView('camera');
   const ok=await startCamera();
   if(!ok){
